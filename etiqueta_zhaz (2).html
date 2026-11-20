@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Etiqueta de Envio - ZHAZ</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #eef0f2; color: #111; }
+  .app { display: flex; gap: 24px; padding: 20px; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
+
+  /* ---------- Painel de preenchimento ---------- */
+  .panel { background: #fff; border-radius: 10px; padding: 18px 20px; width: 520px; max-width: 100%; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  .panel h1 { font-size: 18px; margin: 0 0 12px; }
+  .tipos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .tipos label { border: 2px solid #ccc; border-radius: 8px; padding: 10px 6px; text-align: center; font-weight: bold; cursor: pointer; font-size: 14px; user-select: none; }
+  .tipos input { display: none; }
+  .tipos input:checked + span { color: #fff; }
+  .tipos label:has(input:checked) { background: #111; border-color: #111; color: #fff; }
+  fieldset { border: 1px solid #ddd; border-radius: 8px; margin: 0 0 12px; padding: 8px 12px 12px; }
+  legend { font-weight: bold; font-size: 13px; padding: 0 4px; }
+  .row { display: flex; gap: 8px; }
+  .row > div { flex: 1; min-width: 0; }
+  .f label { display: block; font-size: 11px; font-weight: bold; margin: 7px 0 2px; color: #333; }
+  .f input { width: 100%; padding: 6px 7px; font-size: 14px; border: 1px solid #bbb; border-radius: 5px; }
+  .f input:focus { outline: 2px solid #111; border-color: #111; }
+  .req::after { content: " *"; color: #c00; }
+  .opts { font-size: 13px; margin: 6px 0 12px; }
+  .acoes { display: flex; gap: 8px; }
+  button { font-size: 15px; font-weight: bold; padding: 10px 14px; border-radius: 7px; border: 2px solid #111; cursor: pointer; }
+  .imprimir { background: #111; color: #fff; flex: 1; }
+  .limpar { background: #fff; color: #111; }
+  .aviso { font-size: 12px; color: #a00; min-height: 16px; margin-top: 6px; }
+  .dica { font-size: 11px; color: #666; margin-top: 8px; line-height: 1.4; }
+  .previewbox { position: sticky; top: 20px; }
+  .previewbox .t { font-size: 12px; color: #555; margin-bottom: 6px; text-align: center; }
+  .grupo-tipo { display: none; }
+
+  /* ---------- Etiqueta 100 x 150 mm ---------- */
+  .label { width: 100mm; height: 150mm; padding: 3mm; background: #fff; display: flex; flex-direction: column; gap: 1mm; overflow: hidden; font-weight: bold; }
+  .screen-label { box-shadow: 0 1px 6px rgba(0,0,0,.25); }
+  .lb-head { display: flex; justify-content: space-between; align-items: flex-end; }
+  .lb-title { font-size: 13pt; line-height: 1; }
+  .lb-tipo { display: inline-block; background: #000; color: #fff; font-size: 15pt; padding: 1mm 3mm; letter-spacing: .3px; line-height: 1.1; }
+  .lb-data { text-align: right; font-size: 6.5pt; }
+  .lb-data .box { border: 1.2pt solid #000; width: 24mm; height: 5.5mm; margin-top: .6mm; font-size: 9pt; display: flex; align-items: center; justify-content: center; }
+  .sec { border: 2pt solid #000; }
+  .sec-h { background: #000; color: #fff; font-size: 9.5pt; padding: .7mm 2mm; line-height: 1.1; }
+  .sec-b { padding: .2mm 2mm 1mm; }
+  .lrow { display: flex; gap: 2mm; }
+  .cell { flex: 1; min-width: 0; }
+  .cl { font-size: 5.5pt; margin-top: .4mm; line-height: 1.05; }
+  .cv { border-bottom: 1pt solid #000; min-height: 4.2mm; font-size: 9pt; line-height: 4.1mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cv.big { font-size: 10.5pt; }
+  .cv.sm { font-size: 7.5pt; }
+  .emit { display: flex; gap: 4mm; align-items: flex-end; }
+  .emit .nome { font-size: 16pt; line-height: 1; }
+  .emit-end { font-size: 8.5pt; line-height: 1.25; margin-top: .3mm; }
+  .assin { border-bottom: 1pt solid #000; height: 4mm; }
+  .nfvol { display: flex; gap: 2mm; }
+  .nfbox, .volbox { border: 1.8pt solid #000; height: 8.5mm; display: flex; align-items: center; justify-content: center; font-size: 14pt; overflow: hidden; }
+  .nfbox { font-size: 13pt; padding: 0 1mm; text-align: center; line-height: 1.05; }
+  .vol { display: flex; align-items: center; gap: 1.2mm; }
+  .volbox { width: 10mm; font-size: 17pt; }
+  .vol .de { font-size: 10pt; }
+  .lb-foot { font-size: 5.5pt; text-align: center; font-style: italic; line-height: 1; }
+  .grow { flex: 1; }
+  .bcwrap { border: 1.8pt solid #000; padding: .8mm 1mm .3mm; text-align: center; }
+  .bc { height: 7mm; display: block; margin: 0 auto; }
+  .bcnum { font-size: 12pt; line-height: 1.05; white-space: nowrap; overflow: hidden; }
+  .bcnum.m { font-size: 11pt; }
+  .bcnum.p { font-size: 9pt; }
+  .bc-vazio { border: 1.8pt solid #000; height: 8.5mm; }
+  .scan { background: #fff8d6; border: 2px solid #111; border-radius: 8px; padding: 8px 12px 10px; margin-bottom: 12px; }
+  .scan label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; }
+  .scan input { width: 100%; padding: 9px; font-size: 16px; border: 2px solid #111; border-radius: 6px; }
+  .scan .msg { font-size: 12px; margin-top: 5px; min-height: 15px; color: #0a5d1a; font-weight: bold; }
+  .scan .msg.erro { color: #c00; }
+  .f select { width: 100%; padding: 6px 7px; font-size: 14px; border: 1px solid #bbb; border-radius: 5px; background: #fff; }
+
+  #printArea { display: none; }
+  @page { size: 100mm 150mm; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .app { display: none !important; }
+    #printArea { display: block; }
+    .label { page-break-after: always; break-after: page; box-shadow: none; }
+    .label:last-child { page-break-after: auto; break-after: auto; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="panel">
+    <h1>Etiqueta de Envio · ZHAZ</h1>
+
+    <div class="tipos">
+      <label><input type="radio" name="tipo" value="transportadora" checked><span>Transportadora</span></label>
+      <label><input type="radio" name="tipo" value="rota"><span>Rota</span></label>
+      <label><input type="radio" name="tipo" value="retira"><span>Cliente retira</span></label>
+    </div>
+
+    <div class="scan">
+      <label for="scan">📷 Bipar nota (código de barras ou QR Code)</label>
+      <input id="scan" placeholder="Clique aqui e bipe a nota…" autocomplete="off">
+      <div class="msg" id="scanMsg"></div>
+    </div>
+
+    <div class="f row"><div><label>Data de expedição</label><input id="data" type="date"></div><div></div></div>
+
+    <fieldset>
+      <legend>Destinatário</legend>
+      <div class="f"><label class="req">Nome / Razão social</label><input id="d_nome"></div>
+      <div class="f row">
+        <div><label class="req">CNPJ / CPF</label><input id="d_doc"></div>
+        <div><label>Inscrição Estadual</label><input id="d_ie"></div>
+      </div>
+      <div class="f row">
+        <div style="flex:3.5"><label class="req end">Endereço (rua / avenida)</label><input id="d_end"></div>
+        <div><label class="req end">Nº</label><input id="d_num"></div>
+      </div>
+      <div class="f row">
+        <div><label>Complemento</label><input id="d_comp"></div>
+        <div><label class="req end">Bairro</label><input id="d_bairro"></div>
+      </div>
+      <div class="f row">
+        <div style="flex:2.2"><label class="req end">Cidade</label><input id="d_cidade"></div>
+        <div style="flex:.7"><label class="req end">UF</label><input id="d_uf" maxlength="2"></div>
+        <div style="flex:1.4"><label class="req end">CEP</label><input id="d_cep"></div>
+      </div>
+      <div class="f"><label class="req">Contato / Telefone</label><input id="d_tel"></div>
+      <div class="f"><label>Ponto de referência / Horário de recebimento</label><input id="d_ref"></div>
+    </fieldset>
+
+    <fieldset class="grupo-tipo" data-tipo="transportadora">
+      <legend>Transportadora responsável</legend>
+      <div class="f"><label class="req">Nome / Razão social</label><input id="t_nome"></div>
+      <div class="f row">
+        <div><label class="req">CNPJ</label><input id="t_cnpj"></div>
+        <div><label>Telefone / Nº coleta / Rastreio</label><input id="t_tel"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="grupo-tipo" data-tipo="rota">
+      <legend>Rota (entrega própria)</legend>
+      <div class="f row">
+        <div><label class="req">Rota (nº / nome)</label><input id="r_rota"></div>
+        <div><label>Ordem de entrega</label><input id="r_ordem"></div>
+      </div>
+      <div class="f row">
+        <div><label class="req">Motorista</label><input id="r_mot"></div>
+        <div><label>Veículo / Placa</label><input id="r_placa"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="grupo-tipo" data-tipo="retira">
+      <legend>Cliente retira</legend>
+      <div class="f"><label class="req">Nome de quem vai retirar</label><input id="c_nome"></div>
+      <div class="f row">
+        <div><label class="req">CPF / RG</label><input id="c_doc"></div>
+        <div><label>Placa do veículo</label><input id="c_placa"></div>
+      </div>
+      <div class="f"><label>Data / hora da retirada</label><input id="c_data"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Nota e volumes</legend>
+      <div class="f row">
+        <div><label class="req">Tipo de nota</label>
+          <select id="nota_tipo"><option value="nf">Nota fiscal</option><option value="ns">Nota de serviço</option></select></div>
+        <div style="flex:1.6"><label class="req" id="nf_lbl">Nº da nota fiscal</label><input id="nf" placeholder="preenche sozinho ao bipar"><div id="nfAviso" style="font-size:11px;color:#c00;font-weight:bold;margin-top:3px"></div></div>
+      </div>
+      <div class="f row">
+        <div><label class="req">Total de volumes</label><input id="vol_total" type="number" min="1" value="1"></div>
+        <div><label>Peso (kg)</label><input id="peso"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pedido ou O.S.</legend>
+      <div class="f row">
+        <div><label class="req">Tipo</label>
+          <select id="ref_tipo"><option value="pedido">Pedido</option><option value="os">O.S.</option></select></div>
+        <div style="flex:1.6"><label class="req" id="ref_lbl">Nº do pedido</label><input id="ref_num"></div>
+      </div>
+    </fieldset>
+
+    <div class="opts">
+      <label><input type="checkbox" id="porVolume" checked> Imprimir uma etiqueta por volume (1 de N, 2 de N…)</label>
+    </div>
+    <div class="acoes">
+      <button class="imprimir" id="btnPrint">🖨️ Imprimir</button>
+      <button class="limpar" id="btnClear">Limpar</button>
+    </div>
+    <div class="aviso" id="aviso"></div>
+    <div class="dica">Na impressão, escolham o papel <b>100 × 150 mm</b>, escala <b>100% / Tamanho real</b> e margens <b>Nenhuma</b>. Campos em branco saem com linha para preencher à mão.</div>
+  </div>
+
+  <div class="previewbox">
+    <div class="t">Pré-visualização (tamanho real 10 × 15 cm)</div>
+    <div id="preview"></div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const TIPOS = { transportadora: "TRANSPORTADORA", rota: "ROTA", retira: "CLIENTE RETIRA" };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const v = id => esc(($(id).value || "").trim());
+const tipo = () => document.querySelector('input[name="tipo"]:checked').value;
+
+function dataBR() {
+  const d = $("data").value;
+  if (!d) return "";
+  const [a, m, dd] = d.split("-");
+  return `${dd}/${m}/${a}`;
+}
+
+function cell(label, val, cls = "", style = "") {
+  return `<div class="cell" ${style ? `style="${style}"` : ""}><div class="cl">${label}</div><div class="cv ${cls}">${val}</div></div>`;
+}
+
+function blocoTipo(t) {
+  if (t === "transportadora") return `
+    <div class="sec"><div class="sec-h">TRANSPORTADORA RESPONSÁVEL</div><div class="sec-b">
+      ${cell("Nome / Razão social *", v("t_nome"), "big")}
+      <div class="lrow">${cell("CNPJ *", v("t_cnpj"))}${cell("Telefone / Nº coleta / Rastreio", v("t_tel"))}</div>
+    </div></div>`;
+  if (t === "rota") return `
+    <div class="sec"><div class="sec-h">ROTA — ENTREGA PRÓPRIA</div><div class="sec-b">
+      <div class="lrow">${cell("Rota (nº / nome) *", v("r_rota"), "big", "flex:1.6")}${cell("Ordem de entrega", v("r_ordem"), "big")}</div>
+      <div class="lrow">${cell("Motorista *", v("r_mot"), "", "flex:1.6")}${cell("Veículo / Placa", v("r_placa"))}</div>
+    </div></div>`;
+  return `
+    <div class="sec"><div class="sec-h">CLIENTE RETIRA</div><div class="sec-b">
+      ${cell("Nome de quem vai retirar *", v("c_nome"), "big")}
+      <div class="lrow">${cell("CPF / RG *", v("c_doc"))}${cell("Placa do veículo", v("c_placa"))}${cell("Data / hora", v("c_data"))}</div>
+      <div class="cl">Assinatura de quem retirou</div><div class="assin"></div>
+    </div></div>`;
+}
+
+function etiqueta(volAtual, volTotal) {
+  const t = tipo();
+  const endReq = t === "retira" ? "" : " *";
+  return `
+  <div class="label">
+    <div class="lb-head">
+      <div><div class="lb-tipo">${TIPOS[t]}</div></div>
+      <div class="lb-data">Data de expedição<div class="box">${dataBR()}</div></div>
+    </div>
+
+    <div class="sec"><div class="sec-h">EMITENTE (REMETENTE)</div><div class="sec-b">
+      <div class="emit"><div class="nome">ZHAZ</div><div><div class="cl">CNPJ</div><div style="font-size:10pt">13.350.734/0004-95</div></div></div>
+      <div class="emit-end">R. Marina, 1338 - Boa Vista<br>São Caetano do Sul - SP &nbsp;|&nbsp; CEP 09560-560</div>
+    </div></div>
+
+    <div class="sec"><div class="sec-h">DESTINATÁRIO</div><div class="sec-b">
+      ${cell("Nome / Razão social *", v("d_nome"), "big")}
+      <div class="lrow">${cell("CNPJ / CPF *", v("d_doc"))}${cell("Inscrição Estadual", v("d_ie"))}</div>
+      <div class="lrow">${cell("Endereço (rua / avenida)" + endReq, v("d_end"), "", "flex:3.5")}${cell("Nº" + endReq, v("d_num"))}</div>
+      <div class="lrow">${cell("Complemento", v("d_comp"))}${cell("Bairro" + endReq, v("d_bairro"))}</div>
+      <div class="lrow">${cell("Cidade" + endReq, v("d_cidade"), "", "flex:2.2")}${cell("UF" + endReq, v("d_uf").toUpperCase(), "", "flex:.6")}${cell("CEP" + endReq, v("d_cep"), "big", "flex:1.4")}</div>
+      <div class="lrow">${cell("Contato / Telefone *", v("d_tel"))}${cell("Referência / Horário", v("d_ref"), "sm")}</div>
+    </div></div>
+
+    ${blocoTipo(t)}
+
+    <div class="sec grow"><div class="sec-h">${notaNome()} E VOLUMES</div><div class="sec-b">
+      <div class="cl" style="font-size:6.5pt">${notaNome()} Nº *</div>
+      ${codigoBloco()}
+          <div class="nfvol" style="margin-top:.2mm">
+            <div><div class="cl" style="font-size:6.5pt">VOLUME *</div>
+              <div class="vol"><div class="volbox">${volAtual}</div><span class="de">de</span><div class="volbox">${volTotal}</div></div></div>
+            <div style="flex:1.7;min-width:0">${cell(refNome() + " Nº *", v("ref_num"), "big")}</div>
+            <div style="flex:1;min-width:0">${cell("Peso (kg)", v("peso"))}</div>
+          </div>
+    </div></div>
+  </div>`;
+}
+
+// ---- Código de barras Code 128 (lido por qualquer leitor de mão) ----
+const C128 = "212222 222122 222221 121223 121322 131222 122213 122312 132212 221213 221312 231212 112232 122132 122231 113222 123122 123221 223211 221132 221231 213212 223112 312131 311222 321122 321221 312212 322112 322211 212123 212321 232121 111323 131123 131321 112313 132113 132311 211313 231113 231311 112133 112331 132131 113123 113321 133121 313121 211331 231131 213113 213311 213131 311123 311321 331121 312113 312311 332111 314111 221411 431111 111224 111422 121124 121421 141122 141221 112214 112412 122114 122411 142112 142211 241211 221114 413111 241112 134111 111242 121142 121241 114212 124112 124211 411212 421112 421211 212141 214121 412121 111143 111341 131141 114113 114311 411113 411311 113141 114131 311141 411131 211412 211214 211232 2331112".split(" ");
+function code128(txt) {
+  // mistura os conjuntos B (texto) e C (pares de dígitos) para o código ficar o mais curto possível
+  const cods = []; let modo = null, i = 0;
+  const dig = j => { let k = j; while (k < txt.length && txt[k] >= "0" && txt[k] <= "9") k++; return k - j; };
+  while (i < txt.length) {
+    const r = dig(i);
+    if (modo === "C") {
+      if (r >= 2) { cods.push(+txt.substr(i, 2)); i += 2; continue; }
+      cods.push(100); modo = "B"; continue;                 // volta para B
+    }
+    if (r >= 4 && r % 2 === 0 || (modo === null && r >= 2 && r === txt.length && r % 2 === 0)) {
+      cods.push(modo === null ? 105 : 99); modo = "C"; continue;   // Start C / muda p/ C
+    }
+    if (modo === null) { cods.push(104); modo = "B"; }
+    const c = txt.charCodeAt(i++);
+    if (c >= 32 && c <= 126) cods.push(c - 32);
+  }
+  if (!cods.length) cods.push(104);
+  let soma = cods[0];
+  for (let k = 1; k < cods.length; k++) soma += cods[k] * k;
+  cods.push(soma % 103, 106);
+  return cods.map(c => C128[c]).join("");
+}
+let barrasFinas = false;
+function barrasSvg(txt) {
+  const w = code128(txt), q = 10;
+  let x = q, d = "";
+  for (let i = 0; i < w.length; i++) { const n = +w[i]; if (i % 2 === 0) d += `M${x},0h${n}v1h-${n}z`; x += n; }
+  const total = x + q;
+  const larg = Math.min(total * 0.38, 86);
+  barrasFinas = total * 0.25 > 86;                  // barra fina abaixo de 0,25 mm: difícil de ler          // até 0,38 mm por barra fina, no máximo a largura da etiqueta
+  return `<svg class="bc" style="width:${larg.toFixed(1)}mm" viewBox="0 0 ${total} 1" preserveAspectRatio="none" shape-rendering="crispEdges"><rect width="${total}" height="1" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+}
+
+const ehServico = () => $("nota_tipo").value === "ns";
+const notaNome = () => notas().length > 1 ? (ehServico() ? "NOTAS DE SERVIÇO" : "NOTAS FISCAIS") : (ehServico() ? "NOTA DE SERVIÇO" : "NOTA FISCAL");
+const refNome = () => $("ref_tipo").value === "os" ? "O.S." : "PEDIDO";
+const notas = () => $("nf").value.split(/[\/,;\s]+/).map(x => x.trim()).filter(Boolean);
+
+function codigoBloco() {
+  const lista = notas();
+  if (!lista.length) return `<div class="bc-vazio"></div>`;
+  const texto = lista.join(" / ");
+  const tam = texto.length > 34 ? "p" : texto.length > 22 ? "m" : "";
+  return `<div class="bcwrap">${barrasSvg(lista.join("/"))}<div class="bcnum ${tam}">${esc(texto)}</div></div>`;
+}
+
+function rotulos() {
+  $("nf_lbl").textContent = ehServico() ? "Nº da nota de serviço" : "Nº da nota fiscal";
+  $("ref_lbl").textContent = $("ref_tipo").value === "os" ? "Nº da O.S." : "Nº do pedido";
+}
+
+// ---- Leitura do DANFE (chave de acesso de 44 dígitos) ----
+function lerNota(lido) {
+  const txt = String(lido || "").trim();
+  if (!txt) return;
+  let numero = "";
+  const chave = (txt.match(/\d{44}/) || [])[0];
+  if (chave) {
+    numero = String(parseInt(chave.slice(25, 34), 10));   // posições 26 a 34 = nº da NF
+    if (ehServico() && !$("nf").value.trim()) { $("nota_tipo").value = "nf"; rotulos(); }
+  } else if (/^\d{1,9}$/.test(txt.replace(/\D/g, "")) && txt.replace(/\D/g, "").length === txt.replace(/\s/g, "").length) {
+    numero = String(parseInt(txt.replace(/\D/g, ""), 10));
+  }
+  const msg = $("scanMsg");
+  if (!numero) { msg.className = "msg erro"; msg.textContent = "Não reconheci uma nota nesse código. Tente de novo ou digite o número."; return; }
+  const atuais = notas();
+  const sigla = ehServico() ? "Nota de serviço" : "NF";
+  if (atuais.includes(numero)) {
+    msg.className = "msg erro"; msg.textContent = `${sigla} ${numero} já está na etiqueta.`;
+  } else {
+    atuais.push(numero);
+    $("nf").value = atuais.join(" / ");
+    msg.className = "msg"; msg.textContent = `✔ ${sigla} ${numero} adicionada na etiqueta.`;
+  }
+  atualizar();
+}
+
+function totalVol() {
+  const n = parseInt($("vol_total").value, 10);
+  return Number.isFinite(n) && n > 0 ? n : "";
+}
+
+function atualizar() {
+  const t = tipo();
+  rotulos();
+  document.querySelectorAll(".grupo-tipo").forEach(g => g.style.display = g.dataset.tipo === t ? "block" : "none");
+  document.querySelectorAll("label.end").forEach(l => l.classList.toggle("req", t !== "retira"));
+  const n = totalVol();
+  barrasFinas = false;
+  $("preview").innerHTML = etiqueta(n ? 1 : "", n);
+  $("nfAviso").textContent = barrasFinas ? "Muitas notas: as barras ficaram finas e o leitor pode não ler. Teste antes ou divida em duas etiquetas." : "";
+  $("preview").firstElementChild.classList.add("screen-label");
+}
+
+const OBRIG = {
+  comum: ["d_nome", "d_doc", "d_tel", "nf", "vol_total", "ref_num"],
+  endereco: ["d_end", "d_num", "d_bairro", "d_cidade", "d_uf", "d_cep"],
+  transportadora: ["t_nome", "t_cnpj"],
+  rota: ["r_rota", "r_mot"],
+  retira: ["c_nome", "c_doc"],
+};
+
+function imprimir() {
+  const t = tipo();
+  const lista = [...OBRIG.comum, ...(t === "retira" ? [] : OBRIG.endereco), ...OBRIG[t]];
+  const faltando = lista.filter(id => !$(id).value.trim());
+  document.querySelectorAll(".f input").forEach(i => i.style.borderColor = "");
+  faltando.forEach(id => $(id).style.borderColor = "#c00");
+  if (faltando.length && !confirmarVazio(faltando.length)) return;
+
+  const n = totalVol();
+  let html = "";
+  if ($("porVolume").checked && n) {
+    for (let i = 1; i <= n; i++) html += etiqueta(i, n);
+  } else {
+    html = etiqueta(n ? 1 : "", n);
+  }
+  $("printArea").innerHTML = html;
+  window.print();
+}
+
+let avisoPendente = false;
+function confirmarVazio(qtd) {
+  // sem caixas de diálogo: primeiro clique avisa, segundo clique imprime assim mesmo
+  if (avisoPendente) { avisoPendente = false; $("aviso").textContent = ""; return true; }
+  avisoPendente = true;
+  $("aviso").textContent = `${qtd} campo(s) obrigatório(s) em branco (em vermelho). Clique em Imprimir de novo para imprimir assim mesmo.`;
+  return false;
+}
+
+function limpar() {
+  document.querySelectorAll(".f input").forEach(i => { if (i.id !== "data") i.value = ""; i.style.borderColor = ""; });
+  $("vol_total").value = 1;
+  $("aviso").textContent = ""; avisoPendente = false;
+  $("nota_tipo").value = "nf"; $("ref_tipo").value = "pedido"; $("scanMsg").textContent = "";
+  hoje();
+  $("scan").focus();
+  atualizar();
+}
+
+function hoje() {
+  const d = new Date();
+  $("data").value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+document.addEventListener("input", e => {
+  avisoPendente = false; $("aviso").textContent = "";
+  if (e.target.id === "scan") {
+    // leitores que não mandam Enter: processa sozinho quando chegam os 44 dígitos
+    if (/\d{44}/.test(e.target.value) && !/^https?:/i.test(e.target.value)) { lerNota(e.target.value); e.target.value = ""; }
+    return;
+  }
+  atualizar();
+});
+$("scan").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); lerNota(e.target.value); e.target.value = ""; }
+});
+$("ref_tipo").addEventListener("change", () => { atualizar(); $("ref_num").focus(); });
+document.addEventListener("change", atualizar);
+$("btnPrint").addEventListener("click", imprimir);
+$("btnClear").addEventListener("click", limpar);
+hoje();
+atualizar();
+$("scan").focus();
+</script>
+</body>
+</html>
